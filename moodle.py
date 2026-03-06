@@ -3,7 +3,13 @@ from pynput import keyboard
 #print(pyautogui.position())
 cardPosX, cardPosY = 1592, 519
 knowPosX, knowPosY = 1778, 519
-mess= "-----------\nG - toggle autoclick\nH - toggle flashcards\nF8 - toggle access to functions above\n--------------"
+mess= """
+-----------
+G - toggle autoclick
+H - toggle flashcards
+F8 - toggle access to functions above
+-----------
+"""
 
 def flashcards():
     print("flashcards init")
