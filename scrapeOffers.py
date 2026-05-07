@@ -17,9 +17,10 @@ if(DoWrite == 1):
         f = open("./links.txt", "w")
     except:
         f = open("./links.txt", "x")
+url_list =[f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page={i}"]
 
 for i in range(1,6):
-    url = f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page={i}"
+    url = url_list[0]
     driver.get(url)
     driver.refresh()
     time.sleep(20)  # Optional wait to ensure page loads
