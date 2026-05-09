@@ -17,41 +17,44 @@ if(DoWrite == 1):
         f = open("./links.txt", "w")
     except:
         f = open("./links.txt", "x")
-url_list =[f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page={i}"]
 
-for i in range(1,6):
-    url = url_list[0]
-    driver.get(url)
-    driver.refresh()
-    time.sleep(20)  # Optional wait to ensure page loads
-    # input("Proceed? ")
+url_list =[f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page=",f"https://www.pracuj.pl/praca/opole;wp?rd=0&et=1%2C17%2C2&pn="]
+
+for j in range(len(url_list)):
+    for i in range(1,6):
+        url = url_list[j] + f"{i}"
+        print(url)
+        driver.get(url)
+        driver.refresh()
+        time.sleep(2)  # Optional wait to ensure page loads
+        # input("Proceed? ")
 
     # Extract product details
-    titles = driver.find_elements(By.CLASS_NAME, "job__content")
+        titles = driver.find_elements(By.CLASS_NAME, "job__content")
 
     # Store results in a list
-    for i in range(len(titles)):
-        if titles[i].text != '':
-            print("getting elements")
-            text_list.append([
-                titles[i].text
-            ])
-            links_list.append(
-                titles[i].find_element(By.TAG_NAME, "a").get_attribute("href")
-            )
-    h = 0
-    if(DoWrite == 1):
-        # Write extracted data
-        for row in text_list:
-            f.write(f"Ogłoszenie:\n{row[0]}\nLink:\n{links_list[h]}\n")
-            h+=1
+        for i in range(len(titles)):
+            if titles[i].text != '':
+                print("getting elements")
+                text_list.append([
+                    titles[i].text
+                ])
+                links_list.append(
+                    titles[i].find_element(By.TAG_NAME, "a").get_attribute("href")
+                )
+        h = 0
+        if(DoWrite == 1):
+            # Write extracted data
+            for row in text_list:
+                f.write(f"Ogłoszenie:\n{row[0]}\nLink:\n{links_list[h]}\n")
+                h+=1
 
-    h = 0
-    if(DoPrint == 1):
-        for row in text_list:
-            print(f"\nOgłoszenie:\n{row[0]}")
-            print(f"Link:\n{links_list[h]}")
-            h += 1
+        h = 0
+        if(DoPrint == 1):
+            for row in text_list:
+                print(f"\nOgłoszenie:\n{row[0]}")
+                print(f"Link:\n{links_list[h]}")
+                h += 1
 
 
 # element_list.remove('')
