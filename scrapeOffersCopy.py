@@ -1,8 +1,10 @@
 import time
+import re
 import requests
 from bs4 import BeautifulSoup as BS
+import logging
 
-DoWrite = 0
+DoWrite = 1
 DoPrint = 0
 
 url_list =[
@@ -43,31 +45,50 @@ def scrapePracujPL(url, headers):
     print(title)
 
 def scrapeOLX(url, headers):
+    site = "https://www.olx.pl"
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
     soup = BS(resp.text, 'html.parser')
     title = ""
     link_list = []
+
+    if(DoWrite == 1):
+        try:
+            f = open("./links.txt", "w")
+        except:
+            f = open("./links.txt", "x")
+
     for article in soup.select("div.css-u2ayx9"):
         link_tag = article.find("a")
         link = link_tag["href"]
+        if link.startswith("https://"):
+            continue
+        print(f"Appending {site}{link}")
+        link_list.append(f"{site}{link}")
+        
 
-    print(title)
+    print(link_list)
+    output = ""
+    for i in link_list:
+        print(f"Trying to access {i}")
+        offer = requests.get(url=i, headers=headers, timeout=30)
+        offer.raise_for_status()
+        soup = BS(offer.text, 'html.parser')
+        
+        title = soup.select_one("h4.css-1hd136p").get_text()
+        price = soup.select_one("h3.css-yauxmy").get_text()
+        description = soup.select_one("div.css-1rkcfco").get_text()
+
+        # Write extracted data
+        print(f"Adding new data to output: \n{title}\n{price}")
+        output += f"{i}\n{title}\n{price}\n\n{description}\n\n"
+    if DoWrite == 1:
+        f.write(output)
 
 
 # scrapeOLX(url=(url_list[2] + f"1"), headers=headers)
 scrapeOLX(url=(url_list[2]), headers=headers)
 
-if(DoWrite == 1):
-    try:
-        f = open("./links.txt", "w")
-    except:
-        f = open("./links.txt", "x")
-    h=0
-    # Write extracted data
-    for row in text_list:
-        f.write(f"Ogłoszenie:\n{row[0]}\nLink:\n{links_list[h]}\n")
-        h+=1
 
 if(DoPrint == 1):
     h = 0
