@@ -5,7 +5,11 @@ from bs4 import BeautifulSoup as BS
 import logging
 import sys
 
-EXEC_TYPE = sys.argv[1]
+if len(sys.argv) == 1:
+    EXEC_TYPE = input("What action would you like to perform?\n")
+else:
+    EXEC_TYPE = sys.argv[1]
+
 DoWrite = 1
 DoPrint = 0
 
@@ -18,7 +22,7 @@ headers = {
     "User-Agent": "Personal Research Bot 1.0 (contact: maciejkorniak07@gmail.com)"
 }
 
-def scrapeUseme(url, headers):
+def scrapeUseme(url, headers, f):
     site = "https://www.useme.com"
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
@@ -31,15 +35,13 @@ def scrapeUseme(url, headers):
         link = link_tag["href"] if link_tag else ""
 
         title += f"{site}{link}\n{text}\n\n"
+    
     print(title)
-    if DoWrite == 1:
-        try:
-            f = open("./links.txt", "w")
-        except:
-            f = open("./links.txt", "x")
-        f.write(output)
 
-def scrapePracujPL(url, headers):
+    if DoWrite == 1:
+        f.write(title)
+
+def scrapePracujPL(url, headers, f):
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
     soup = BS(resp.text, 'html.parser')
@@ -52,13 +54,9 @@ def scrapePracujPL(url, headers):
         title += f"{link}\n{text}\n\n"
     print(title)
     if DoWrite == 1:
-        try:
-            f = open("./links.txt", "w")
-        except:
-            f = open("./links.txt", "x")
-        f.write(output)
+        f.write(title)
 
-def scrapeOLX(url, headers):
+def scrapeOLX(url, headers, f):
     site = "https://www.olx.pl"
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
@@ -71,7 +69,7 @@ def scrapeOLX(url, headers):
         link = link_tag["href"]
         if link.startswith("https://"):
             continue
-        print(f"Appending {site}{link}")
+        print(f"Appending list of links")
         link_list.append(f"{site}{link}")
         
 
@@ -88,26 +86,56 @@ def scrapeOLX(url, headers):
         description = soup.select_one("div.css-1rkcfco").get_text()
 
         # Write extracted data
-        print(f"Adding new data to output: \n{title}\n{price}")
+        print(f"Adding new data to output: \n{title}")
         output += f"{i}\n{title}\n{price}\n\n{description}\n\n"
     if DoWrite == 1:
-        try:
-            f = open("./links.txt", "w")
-        except:
-            f = open("./links.txt", "x")
         f.write(output)
 
 match EXEC_TYPE:
     case "zlecenia":
+        useme_file = None
+        if DoWrite == 1:
+            try:
+                useme_file = open("./useme_file.txt", "w")
+            except:
+                useme_file = open("./useme_file.txt", "x")
         for i in range(1,6):
-            scrapeUseme(url=(url_list[0] + f"{i}"), headers=headers)
+            scrapeUseme(url=(url_list[0] + f"{i}"), headers=headers, f=useme_file)
     case "praca":
+        pracuj_file = None
+        if DoWrite == 1:
+            try:
+                pracuj_file = open("./pracuj_file.txt", "w")
+            except:
+                pracuj_file = open("./pracuj_file.txt", "x")
         for i in range(1,6):
-            scrapePracujPL(url=(url_list[1] + f"{i}"), headers=headers)
+            scrapePracujPL(url=(url_list[1] + f"{i}"), headers=headers, f=pracuj_file)
     case "mieszkania":
+        olx_file = None
+        if DoWrite == 1:
+            try:
+                olx_file = open("./olx_file.txt", "w")
+            except:
+                olx_file = open("./olx_file.txt", "x")
         for i in range(1,6):
-            scrapeOLX(url=(url_list[2] + f"{i}"), headers=headers)
-        
+            scrapeOLX(url=(url_list[2] + f"{i}"), headers=headers, f=olx_file)
+    case "all":
+        useme_file = None
+        pracuj_file = None
+        olx_file = None
+        if DoWrite == 1:
+            try:
+                useme_file = open("./useme_file.txt", "w")
+                pracuj_file = open("./pracuj_file.txt", "w")
+                olx_file = open("./olx_file.txt", "w")
+            except:
+                useme_file = open("./useme_file.txt", "x")
+                pracuj_file = open("./pracuj_file.txt", "x")
+                olx_file = open("./olx_file.txt", "x")
+        for i in range(1,6):
+            scrapeUseme(url=(url_list[0] + f"{i}"), headers=headers, f=useme_file)
+            scrapePracujPL(url=(url_list[1] + f"{i}"), headers=headers, f=pracuj_file)
+            scrapeOLX(url=(url_list[2] + f"{i}"), headers=headers, f=olx_file)
 
 if(DoPrint == 1):
     h = 0
