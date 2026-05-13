@@ -32,6 +32,12 @@ def scrapeUseme(url, headers):
 
         title += f"{site}{link}\n{text}\n\n"
     print(title)
+    if DoWrite == 1:
+        try:
+            f = open("./links.txt", "w")
+        except:
+            f = open("./links.txt", "x")
+        f.write(output)
 
 def scrapePracujPL(url, headers):
     resp = requests.get(url, headers=headers, timeout=30)
@@ -45,6 +51,12 @@ def scrapePracujPL(url, headers):
 
         title += f"{link}\n{text}\n\n"
     print(title)
+    if DoWrite == 1:
+        try:
+            f = open("./links.txt", "w")
+        except:
+            f = open("./links.txt", "x")
+        f.write(output)
 
 def scrapeOLX(url, headers):
     site = "https://www.olx.pl"
@@ -87,12 +99,16 @@ def scrapeOLX(url, headers):
 
 match EXEC_TYPE:
     case "zlecenia":
-        scrapeUseme(url=(url_list[0] + f"1"), headers=headers)
+        for i in range(1,6):
+            scrapeUseme(url=(url_list[0] + f"{i}"), headers=headers)
     case "praca":
-        scrapePracujPL(url=(url_list[1] + f"1"), headers=headers)
+        for i in range(1,6):
+            scrapePracujPL(url=(url_list[1] + f"{i}"), headers=headers)
     case "mieszkania":
-        scrapeOLX(url=(url_list[2] + f"1"), headers=headers)
+        for i in range(1,6):
+            scrapeOLX(url=(url_list[2] + f"{i}"), headers=headers)
         
+
 if(DoPrint == 1):
     h = 0
     for row in text_list:
