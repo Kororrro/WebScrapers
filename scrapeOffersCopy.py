@@ -3,7 +3,9 @@ import re
 import requests
 from bs4 import BeautifulSoup as BS
 import logging
+import sys
 
+EXEC_TYPE = sys.argv[1]
 DoWrite = 1
 DoPrint = 0
 
@@ -52,12 +54,6 @@ def scrapeOLX(url, headers):
     title = ""
     link_list = []
 
-    if(DoWrite == 1):
-        try:
-            f = open("./links.txt", "w")
-        except:
-            f = open("./links.txt", "x")
-
     for article in soup.select("div.css-u2ayx9"):
         link_tag = article.find("a")
         link = link_tag["href"]
@@ -83,13 +79,20 @@ def scrapeOLX(url, headers):
         print(f"Adding new data to output: \n{title}\n{price}")
         output += f"{i}\n{title}\n{price}\n\n{description}\n\n"
     if DoWrite == 1:
+        try:
+            f = open("./links.txt", "w")
+        except:
+            f = open("./links.txt", "x")
         f.write(output)
 
-
-# scrapeOLX(url=(url_list[2] + f"1"), headers=headers)
-scrapeOLX(url=(url_list[2]), headers=headers)
-
-
+match EXEC_TYPE:
+    case "zlecenia":
+        scrapeUseme(url=(url_list[0] + f"1"), headers=headers)
+    case "praca":
+        scrapePracujPL(url=(url_list[1] + f"1"), headers=headers)
+    case "mieszkania":
+        scrapeOLX(url=(url_list[2] + f"1"), headers=headers)
+        
 if(DoPrint == 1):
     h = 0
     for row in text_list:
