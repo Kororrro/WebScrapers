@@ -13,11 +13,12 @@ else:
 DoWrite = 1
 DoPrint = 0
 
-url_list =[
-    f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page=",
-    f"https://www.pracuj.pl/praca/opole;wp?rd=0&et=1%2C17%2C2&pn=",
-    f"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/opole/q-mieszkanie-na-wynajem/"
-]
+url_list ={
+    "useme" : f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page=",
+    "pracujpl-1" :f"https://www.pracuj.pl/praca/opole;wp?rd=0&et=1%2C17%2C2&pn=",
+    "pracujpl-2" : f"https://it.pracuj.pl/praca/opole;wp?rd=0&et=17&tc=2",
+    "olx" : f"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/opole/q-mieszkanie-na-wynajem/"
+}
 headers = {
     "User-Agent": "Personal Research Bot 1.0 (contact: maciejkorniak07@gmail.com)"
 }
@@ -100,7 +101,8 @@ match EXEC_TYPE:
             except:
                 useme_file = open("./useme_file.txt", "x")
         for i in range(1,6):
-            scrapeUseme(url=(url_list[0] + f"{i}"), headers=headers, f=useme_file)
+            scrapeUseme(url=(url_list["useme"] + f"{i}"), headers=headers, f=useme_file)
+
     case "praca":
         pracuj_file = None
         if DoWrite == 1:
@@ -109,7 +111,8 @@ match EXEC_TYPE:
             except:
                 pracuj_file = open("./pracuj_file.txt", "x")
         for i in range(1,6):
-            scrapePracujPL(url=(url_list[1] + f"{i}"), headers=headers, f=pracuj_file)
+            scrapePracujPL(url=(url_list["pracujpl-1"] + f"{i}"), headers=headers, f=pracuj_file)
+
     case "mieszkania":
         olx_file = None
         if DoWrite == 1:
@@ -118,7 +121,8 @@ match EXEC_TYPE:
             except:
                 olx_file = open("./olx_file.txt", "x")
         for i in range(1,6):
-            scrapeOLX(url=(url_list[2] + f"{i}"), headers=headers, f=olx_file)
+            scrapeOLX(url=(url_list["olx"] + f"{i}"), headers=headers, f=olx_file)
+
     case "all":
         useme_file = None
         pracuj_file = None
@@ -133,9 +137,14 @@ match EXEC_TYPE:
                 pracuj_file = open("./pracuj_file.txt", "x")
                 olx_file = open("./olx_file.txt", "x")
         for i in range(1,6):
-            scrapeUseme(url=(url_list[0] + f"{i}"), headers=headers, f=useme_file)
-            scrapePracujPL(url=(url_list[1] + f"{i}"), headers=headers, f=pracuj_file)
-            scrapeOLX(url=(url_list[2] + f"{i}"), headers=headers, f=olx_file)
+            scrapeUseme(url=(url_list["useme"] + f"{i}"), headers=headers, f=useme_file)
+            scrapePracujPL(url=(url_list["pracujpl-1"] + f"{i}"), headers=headers, f=pracuj_file)
+            scrapeOLX(url=(url_list["olx"] + f"{i}"), headers=headers, f=olx_file)
+
+    case "test":
+        pracuj_file = open("linkipraca.txt", "x")
+        for i in range(1,3):
+            scrapePracujPL(url_list[f"pracujpl-{i}"], headers, pracuj_file)
 
 if(DoPrint == 1):
     h = 0
