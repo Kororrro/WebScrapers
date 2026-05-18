@@ -17,11 +17,25 @@ url_list ={
     "useme" : f"https://useme.com/pl/jobs/category/programowanie-i-it,35/?page=",
     "pracujpl-1" :f"https://www.pracuj.pl/praca/opole;wp?rd=0&et=1%2C17%2C2&pn=",
     "pracujpl-2" : f"https://it.pracuj.pl/praca/opole;wp?rd=0&et=17&tc=2",
-    "olx" : f"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/opole/q-mieszkanie-na-wynajem/"
+    "olx" : f"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/opole/q-mieszkanie-na-wynajem/",
+    "olx-praca-1" : f"https://www.olx.pl/praca/opole/?search%5Bfilter_enum_agreement%5D%5B0%5D=zlecenie",
+    "olx-praca-2": f"https://www.olx.pl/praca/opole/?search%5Bfilter_enum_type%5D%5B0%5D=fulltime&search%5Bfilter_enum_agreement%5D%5B0%5D=zlecenie",
+    "olx_test" : f"https://www.olx.pl/praca/"
 }
 headers = {
     "User-Agent": "Personal Research Bot 1.0 (contact: maciejkorniak07@gmail.com)"
 }
+
+class Bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def scrapeUseme(url, headers, f):
     site = "https://www.useme.com"
@@ -57,7 +71,7 @@ def scrapePracujPL(url, headers, f):
     if DoWrite == 1:
         f.write(title)
 
-def scrapeOLX(url, headers, f):
+def scrapeOLX(url, headers, f, tags):
     site = "https://www.olx.pl"
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
@@ -65,9 +79,14 @@ def scrapeOLX(url, headers, f):
     title = ""
     link_list = []
 
-    for article in soup.select("div.css-u2ayx9"):
-        link_tag = article.find("a")
+    print(tags[0])
+
+    for article in soup.select(f"{tags[0]}"):
+        print("This is getting executed")
+        link_tag = article.find("a", None ,True)
+        print(link_tag)
         link = link_tag["href"]
+        print(link)
         if link.startswith("https://"):
             continue
         print(f"Appending list of links")
@@ -77,20 +96,27 @@ def scrapeOLX(url, headers, f):
     print(link_list)
     output = ""
     for i in link_list:
-        print(f"Trying to access {i}")
+        print(f"{Bcolors.OKGREEN}Trying to access{Bcolors.ENDC} {i}")
         offer = requests.get(url=i, headers=headers, timeout=30)
         offer.raise_for_status()
         soup = BS(offer.text, 'html.parser')
-        
-        title = soup.select_one("h4.css-1hd136p").get_text()
-        price = soup.select_one("h3.css-yauxmy").get_text()
-        description = soup.select_one("div.css-1rkcfco").get_text()
+        title = ""
 
+        for j in tags:
+            if j == tags[0]: 
+                continue
+            try:
+                title += soup.select_one(j).get_text("\n") + "\n"
+                print(f"{Bcolors.OKBLUE}Adding new data to output:{Bcolors.ENDC}\n{title}")
+                
+            except:
+                print(f"{Bcolors.WARNING}Something went wrong while adding text")
+                input("Proceed?\t")
+        
         # Write extracted data
-        print(f"Adding new data to output: \n{title}")
-        output += f"{i}\n{title}\n{price}\n\n{description}\n\n"
-    if DoWrite == 1:
-        f.write(output)
+        output += f"{i}\n\n{title}\n\n"
+        if DoWrite == 1:
+            f.write(output)
 
 match EXEC_TYPE:
     case "zlecenia":
@@ -142,9 +168,22 @@ match EXEC_TYPE:
             scrapeOLX(url=(url_list["olx"] + f"{i}"), headers=headers, f=olx_file)
 
     case "test":
-        pracuj_file = open("linkipraca.txt", "x")
-        for i in range(1,3):
-            scrapePracujPL(url_list[f"pracujpl-{i}"], headers, pracuj_file)
+        try:
+            pracuj_file = open("linkipraca.txt", "x")
+        except:
+            pracuj_file = open("linkipraca.txt", "w")
+        tags = [
+            "div.css-qnyeki",
+            "h1.css-wzfqzc",
+            "div.css-1he1sjz"
+        ]
+        mieszkania_tagi = [
+            "css-u2ayx9"
+        ]
+        
+        scrapeOLX(url_list[f"olx_test"], headers, pracuj_file, tags)
+        # scrapeOLX(url_list[f"olx-praca-1"], headers, pracuj_file, tags)
+        # scrapeOLX(url_list[f"olx-praca-2"], headers, pracuj_file, tags)
 
 if(DoPrint == 1):
     h = 0
